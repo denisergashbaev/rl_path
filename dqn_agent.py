@@ -2,13 +2,16 @@ import os
 import tensorflow as tf
 import numpy as np
 import random
+import shutil
+
 
 
 # ~~~~~ Deep Q-Learning (DQN) Agent ~~~~~ #
 
 class Agent:
-    def __init__(self, action_space, gamma, minibatch_size, observation_shape, replay_memory_capacity):
 
+    def __init__(self, action_space, gamma, minibatch_size, observation_shape, replay_memory_capacity, test):
+        self.test = test
         # Agent variables
         self.action_space = action_space
         self.replay_memory_capacity = replay_memory_capacity
@@ -18,6 +21,7 @@ class Agent:
         # Initialize replay memory
         self.replay_memory = ReplayBuffer(replay_memory_capacity)
 
+        self.sess = tf.Session()
         # ~~~ Create placeholders  ~~~ #
 
         self.o_t_ph = tf.placeholder(tf.uint8, [None] + list(observation_shape))
@@ -68,7 +72,11 @@ class Agent:
         # Apply gradients
         self.train_op = self.optimizer.apply_gradients(self.gradients)
 
-        # ~~~ ~~~ #
+        self.save_dir = 'checkpoints/'
+        self.saver = tf.train.Saver()
+        if not test:
+            shutil.rmtree(self.save_dir)
+            # ~~~ ~~~ #
 
     # Q Function approximator based on some observation and network weights (scope)
     def Q(self, observation, scope):
@@ -126,16 +134,33 @@ class Agent:
             return Q_obs
 
     # Initialize Q network weights and target Q network weights
-    def initialize_neural_net_weights(self, sess):
-
+    def initialize_neural_net_weights(self):
         # Initialize neural network weights and biases ...
-        sess.run(tf.global_variables_initializer())
+        self.sess.run(tf.global_variables_initializer())
+        # https://stackoverflow.com/questions/33759623/tensorflow-how-to-save-restore-a-model/33763208#33763208
+        if self.test:
+            self.saver.restore(sess=self.sess, save_path=tf.train.latest_checkpoint('checkpoints/'))
 
         # ... and make the Q and target Q networks equal
-        self.update_target_Q_network_weights(sess)
+        self.update_target_Q_network_weights(ignore=True)
+        self.print_vars()
+
+    def print_vars(self):
+        graph = tf.get_default_graph()
+        for v in [v for v in tf.trainable_variables()]:
+            print("\n")
+            #print(v[0])
+            # It will give tensor object
+            var = graph.get_tensor_by_name(v.name)
+
+            # To get the value (numpy array)
+            var_value = self.sess.run(var)
+            print('var_name:', v.name, '\nvar_value: ', var_value)
 
     # Update target Q network weights to be equal to the Q network weights
-    def update_target_Q_network_weights(self, sess):
+    def update_target_Q_network_weights(self, ignore=False):
+        if self.test and not ignore:
+            raise RuntimeError('Cannot update targer q-network weights on testing')
 
         new_target_Q_network_weights = []
 
@@ -144,7 +169,7 @@ class Agent:
             new_target_Q_network_weights.append(target_Q_w.assign(Q_w))
 
         copy_op = tf.group(*new_target_Q_network_weights)
-        sess.run(copy_op)
+        self.sess.run(copy_op)
 
     # Epsilon greedy exploration
     def set_exploration_scheme(self, initial_epsilon, final_epsilon, delta_epsilon):
@@ -162,11 +187,10 @@ class Agent:
             self.epsilon -= self.delta_epsilon
 
     # Choose an action based on observation and exploration probability
-    def act(self, o_t, sess):
+    def act(self, o_t):
 
         # Explore if random probability is less than the epsilon value ...
         if np.random.rand() <= self.epsilon:
-
             # Random action from the action space
             a_t = np.random.randint(self.action_space)
 
@@ -175,7 +199,7 @@ class Agent:
             # Reshape for Q function approximator
             o_t = np.reshape(o_t, (1,) + self.observation_shape)
 
-            Q_o_t = sess.run(self.Q_o_t, feed_dict={self.o_t_ph: o_t})
+            Q_o_t = self.sess.run(self.Q_o_t, feed_dict={self.o_t_ph: o_t})
             a_t = np.argmax(Q_o_t)
 
         return a_t
@@ -183,30 +207,31 @@ class Agent:
         # Update the replay memory
 
     def update_replay_memory(self, o_t, a_t, r_tp1, o_tp1, done):
-
-        self.replay_memory.add(o_t, a_t, r_tp1, o_tp1, float(done))
+        if not self.test:
+            self.replay_memory.add(o_t, a_t, r_tp1, o_tp1, float(done))
 
     # Train the Q network once every <update_frequency> iterations
-    def train(self, sess):
+    def train(self):
+        if self.test:
+            raise RuntimeError('Cannot train on testing')
+
 
         # Fetch <minibatch_size> samples
         o_t_batch, a_t_batch, r_tp1_batch, o_tp1_batch, done_mask_batch = self.replay_memory.sample(self.minibatch_size)
 
         # Update Q network
-        sess.run(self.train_op, feed_dict={self.o_t_ph: o_t_batch,
+        self.sess.run(self.train_op, feed_dict={self.o_t_ph: o_t_batch,
                                            self.a_t_ph: a_t_batch,
                                            self.r_tp1_ph: r_tp1_batch,
                                            self.o_tp1_ph: o_tp1_batch,
                                            self.done_mask_ph: done_mask_batch})
 
-    def save(self, sess):
+    def save(self, global_step):
         # https://github.com/Hvass-Labs/TensorFlow-Tutorials/blob/master/04_Save_Restore.ipynb
-        saver = tf.train.Saver()
-        save_dir = 'checkpoints/'
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-        save_path = os.path.join(save_dir, 'best_reward')
-        saver.save(sess=sess, save_path=save_path)
+        if not os.path.exists(self.save_dir):
+            os.makedirs(self.save_dir)
+        save_path = os.path.join(self.save_dir, 'best_reward')
+        self.saver.save(sess=self.sess, save_path=save_path, global_step=global_step)
 
 
 # ~~~~~ Replay Buffer ~~~~~ #
