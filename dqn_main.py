@@ -10,7 +10,7 @@ import os
 ##### DQN #####
 
 # ~~~ Embroidery specific ~~~ #
-test = False
+test = True
 debug = False
 two_by_two = True
 # 1st layer
@@ -160,7 +160,7 @@ while completed_episodes < nb_episodes:
         number_of_observations_experienced += 1
         o_t = o_tp1
 
-    if completed_episodes % episodes_per_epoch == 0:
+    if completed_episodes % episodes_per_epoch == 0 or test:
         print('Episode ', completed_episodes, ', mean reward over last ', episodes_per_epoch, ' episodes: ',
               np.mean(episode_reward[-episodes_per_epoch:]))
         print('Epsilon: ', agent.epsilon)
