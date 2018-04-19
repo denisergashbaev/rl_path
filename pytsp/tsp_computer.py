@@ -5,6 +5,12 @@ import numpy as np
 
 
 class TSPComputer:
+
+    def manhattan_distance(self, start, end):
+        sx, sy = start
+        ex, ey = end
+        return abs(ex - sx) + abs(ey - sy)
+
     def __init__(self, layer_1):
         self.coords = OrderedDict()
         self.back_coords = {}

@@ -72,8 +72,10 @@ class Agent:
         # Apply gradients
         self.train_op = self.optimizer.apply_gradients(self.gradients)
 
-        self.save_dir = 'checkpoints/'
         self.saver = tf.train.Saver()
+        self.save_dir = 'checkpoints/'
+        if not os.path.exists(self.save_dir):
+            os.makedirs(self.save_dir)
         if not test:
             shutil.rmtree(self.save_dir)
             # ~~~ ~~~ #
@@ -230,8 +232,6 @@ class Agent:
         if self.test:
             raise RuntimeError('cannot save network during test')
         # https://github.com/Hvass-Labs/TensorFlow-Tutorials/blob/master/04_Save_Restore.ipynb
-        if not os.path.exists(self.save_dir):
-            os.makedirs(self.save_dir)
         save_path = os.path.join(self.save_dir, 'best_reward')
         self.saver.save(sess=self.sess, save_path=save_path, global_step=global_step)
 
