@@ -170,6 +170,7 @@ while completed_episodes < nb_episodes:
               np.mean(episode_reward[-episodes_per_epoch:]) if len(episode_reward) >= episodes_per_epoch else 0)
         print('Epsilon: ', agent.epsilon)
         print('RL steps: ', dqn_env.steps, ', reward: ' + str(ep_reward), ', done: ', episode_done)
+        print('steps', len(dqn_env.steps) , 'coords: ', len(tsp_computer.coords.keys()))
         if episode_done and len(dqn_env.steps) == len(tsp_computer.coords.keys()):
             print('tsp_cost', tsp_computer.tsp_cost(dqn_env.steps[0]))
             print('rl_cost', tsp_computer.rl_cost(dqn_env.steps))
