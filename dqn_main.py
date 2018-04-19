@@ -15,7 +15,7 @@ from pytsp.tsp_computer import TSPComputer
 
 test = False
 debug = False
-two_by_two = True
+two_by_two = False
 # 1st layer
 layer_1 = np.load(os.path.join('data', '7_17.npy'))
 if two_by_two:
