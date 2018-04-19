@@ -1,5 +1,6 @@
 #!/usr/bin/python3.5
 import math
+
 import numpy as np
 
 from dqn_env import DqnEnv
@@ -10,13 +11,17 @@ import os
 ##### DQN #####
 
 # ~~~ Embroidery specific ~~~ #
-test = True
+from pytsp.tsp_computer import TSPComputer
+
+test = False
 debug = False
 two_by_two = True
 # 1st layer
-layer_1 = np.load('7_17.npy')
+layer_1 = np.load(os.path.join('data', '7_17.npy'))
 if two_by_two:
-    layer_1 = np.array([[0, 255], [255, 0]])
+    layer_1 = np.array([[0, 255], [255, 255]])
+
+tsp_computer = TSPComputer(layer_1)
 
 x_dim, y_dim = layer_1.shape
 
@@ -100,7 +105,7 @@ while completed_episodes < nb_episodes:
 
     dqn_env = DqnEnv()
     ep_reward = 0.0
-    while episode_done is not True:
+    while not episode_done and not (test and t >= 1000):
         # Choose an action based on observation and exploration probability
         a_t = agent.act(o_t)
 
@@ -125,7 +130,7 @@ while completed_episodes < nb_episodes:
         ep_reward += r_tp1
 
         if episode_done:
-            if max_reward <= ep_reward:
+            if not test and max_reward <= ep_reward:
                 str_out = 'max_reward={} <= ep_reward={}'.format(max_reward, ep_reward)
                 max_reward = ep_reward
                 agent.save(global_step=t)
@@ -162,9 +167,12 @@ while completed_episodes < nb_episodes:
 
     if completed_episodes % episodes_per_epoch == 0 or test:
         print('Episode ', completed_episodes, ', mean reward over last ', episodes_per_epoch, ' episodes: ',
-              np.mean(episode_reward[-episodes_per_epoch:]))
+              np.mean(episode_reward[-episodes_per_epoch:]) if len(episode_reward) >= episodes_per_epoch else 0)
         print('Epsilon: ', agent.epsilon)
-        print('Steps: ', dqn_env.steps, ', reward: ' + str(ep_reward))
+        print('RL steps: ', dqn_env.steps, ', reward: ' + str(ep_reward), ', done: ', episode_done)
+        if episode_done and len(dqn_env.steps) == len(tsp_computer.coords.keys()):
+            print('tsp_cost', tsp_computer.tsp_cost(dqn_env.steps[0]))
+            print('rl_cost', tsp_computer.rl_cost(dqn_env.steps))
 
 
 save_dir = 'out'

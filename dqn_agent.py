@@ -84,19 +84,19 @@ class Agent:
         # Build neural net under a scope to separate both Q and target Q networks
         with tf.variable_scope(scope):
 
-            if observation.shape.dims[1] == 2 and observation.shape.dims[2] == 2:
+            if observation.shape.dims[1:3] == [2, 2]:
                 # 2x2 images network
                 # m x 2x2x2 -> m x 2x2x8
                 conv1 = tf.contrib.layers.conv2d(inputs=observation, num_outputs=8, kernel_size=(1, 1), stride=(1, 1),
                                                  padding='VALID', activation_fn=tf.nn.relu)
 
-                # m x 2x2x8 -> m x 2x2x12
-                conv2 = tf.contrib.layers.conv2d(inputs=conv1, num_outputs=12, kernel_size=(2, 2), stride=(1, 1),
-                                                 padding='SAME', activation_fn=tf.nn.relu)
+                # m x 2x2x8 -> m x 2x2x16
+                conv2 = tf.contrib.layers.conv2d(inputs=conv1, num_outputs=16, kernel_size=(1, 1), stride=(1, 1),
+                                                 padding='VALID', activation_fn=tf.nn.relu)
 
-                # m x 2x2x12 -> m x 2x2x16
+                # m x 2x2x16 -> m x 1x1x16
                 conv3 = tf.contrib.layers.conv2d(inputs=conv2, num_outputs=16, kernel_size=(2, 2), stride=(1, 1),
-                                                 padding='SAME', activation_fn=tf.nn.relu)
+                                                 padding='VALID', activation_fn=tf.nn.relu)
 
                 # m x 6x6x16 -> m x 64
                 flat1 = tf.contrib.layers.flatten(inputs=conv3)
@@ -227,6 +227,8 @@ class Agent:
                                            self.done_mask_ph: done_mask_batch})
 
     def save(self, global_step):
+        if self.test:
+            raise RuntimeError('cannot save network during test')
         # https://github.com/Hvass-Labs/TensorFlow-Tutorials/blob/master/04_Save_Restore.ipynb
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
