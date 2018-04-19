@@ -6,11 +6,6 @@ import numpy as np
 
 class TSPComputer:
 
-    def manhattan_distance(self, start, end):
-        sx, sy = start
-        ex, ey = end
-        return abs(ex - sx) + abs(ey - sy)
-
     def __init__(self, layer_1):
         self.coords = OrderedDict()
         self.back_coords = {}
@@ -26,10 +21,9 @@ class TSPComputer:
     def rl_cost(self, coords):
         cost = 0
         idx = [self.back_coords[c] for c in coords]
-        print('idx', idx)
-        for p0, p1 in [idx[x:x+2] for x in range(0, len(idx), 2)]:
+        for p0 in idx:
+            p1 = p0 + 1 if p0 < len(idx) - 1 else 0
             cost += self.dist_matrix[p0][p1]
-        cost += self.dist_matrix[idx[-1]][idx[0]]
         return cost
 
     def tsp_cost(self, start_coord):
