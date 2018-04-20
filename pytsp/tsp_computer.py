@@ -27,7 +27,7 @@ class TSPComputer:
         return cost
 
     def tsp_cost(self, start_coord):
-        out_f = "./tsp_dist.tsp"
+        out_f = "./temp/tsp_dist.tsp"
         with open(out_f, 'w') as dest:
             dest.write(dumps_matrix(self.dist_matrix, name="TSP_Route"))
         tour = run(out_f, start=self.back_coords[start_coord], solver="lkh")
