@@ -9,9 +9,8 @@ import shutil
 # ~~~~~ Deep Q-Learning (DQN) Agent ~~~~~ #
 
 class Agent:
-
-    def __init__(self, action_space, gamma, minibatch_size, observation_shape, replay_memory_capacity, test):
-        self.test = test
+    def __init__(self, action_space, gamma, minibatch_size, observation_shape, replay_memory_capacity, c):
+        self.c = c
         # Agent variables
         self.action_space = action_space
         self.replay_memory_capacity = replay_memory_capacity
@@ -73,10 +72,10 @@ class Agent:
         self.train_op = self.optimizer.apply_gradients(self.gradients)
 
         self.saver = tf.train.Saver()
-        self.save_dir = 'checkpoints/'
+        self.save_dir = self.c.get_checkpoints_save_dir()
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
-        if not test:
+        if not c.test:
             shutil.rmtree(self.save_dir)
             # ~~~ ~~~ #
 
@@ -140,8 +139,8 @@ class Agent:
         # Initialize neural network weights and biases ...
         self.sess.run(tf.global_variables_initializer())
         # https://stackoverflow.com/questions/33759623/tensorflow-how-to-save-restore-a-model/33763208#33763208
-        if self.test:
-            self.saver.restore(sess=self.sess, save_path=tf.train.latest_checkpoint('checkpoints/'))
+        if self.c.reuse_weights:
+            self.saver.restore(sess=self.sess, save_path=tf.train.latest_checkpoint(self.c.get_checkpoints_load_dir()))
 
         # ... and make the Q and target Q networks equal
         self.update_target_Q_network_weights(ignore=True)
@@ -161,7 +160,7 @@ class Agent:
 
     # Update target Q network weights to be equal to the Q network weights
     def update_target_Q_network_weights(self, ignore=False):
-        if self.test and not ignore:
+        if self.c.test and not ignore:
             raise RuntimeError('Cannot update targer q-network weights on testing')
 
         new_target_Q_network_weights = []
@@ -209,14 +208,13 @@ class Agent:
         # Update the replay memory
 
     def update_replay_memory(self, o_t, a_t, r_tp1, o_tp1, done):
-        if not self.test:
+        if not self.c.test:
             self.replay_memory.add(o_t, a_t, r_tp1, o_tp1, float(done))
 
     # Train the Q network once every <update_frequency> iterations
     def train(self):
-        if self.test:
+        if self.c.test:
             raise RuntimeError('Cannot train on testing')
-
 
         # Fetch <minibatch_size> samples
         o_t_batch, a_t_batch, r_tp1_batch, o_tp1_batch, done_mask_batch = self.replay_memory.sample(self.minibatch_size)
@@ -229,7 +227,7 @@ class Agent:
                                            self.done_mask_ph: done_mask_batch})
 
     def save(self, global_step):
-        if self.test:
+        if self.c.test:
             raise RuntimeError('cannot save network during test')
         # https://github.com/Hvass-Labs/TensorFlow-Tutorials/blob/master/04_Save_Restore.ipynb
         save_path = os.path.join(self.save_dir, 'best_reward')

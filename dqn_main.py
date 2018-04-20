@@ -6,6 +6,7 @@ import numpy as np
 from dqn_env import DqnEnv
 from dqn_agent import Agent
 import os
+import copy
 
 
 ##### DQN #####
@@ -13,13 +14,46 @@ import os
 # ~~~ Embroidery specific ~~~ #
 from pytsp.tsp_computer import TSPComputer
 
-test = False
-debug = False
-two_by_two = False
+
+class Config:
+    def __init__(self, data_file, test, reuse_weights, debug):
+        self.data_file = data_file
+        self.test = test
+        self.reuse_weights = reuse_weights
+        self.debug = debug
+
+    def get_name(self):
+        return 'data_file={},reuse_weights={},test={}'.format(self.data_file, self.reuse_weights, self.test)
+
+    def get_out_dir(self):
+        return os.path.join('out', self.get_name())
+
+    def get_checkpoints_save_dir(self):
+        return os.path.join('checkpoints', self.get_name())
+
+    def get_checkpoints_load_dir(self):
+        c2 = copy.copy(self)
+        if self.reuse_weights:
+            c2.reuse_weights = None
+            c2.data_file = self.reuse_weights
+        return os.path.join('checkpoints', c2.get_name())
+
+    def load_file(self):
+        if self.data_file == '2x2':
+            return np.array([[0, 255], [0, 255]])
+        else:
+            return np.load(os.path.join('data', self.data_file))
+
+
+c = Config(
+    data_file='2x2',
+    test=False,
+    reuse_weights='2x2', # None or file name
+    debug=False
+)
+
 # 1st layer
-layer_1 = np.load(os.path.join('data', '7_17.npy'))
-if two_by_two:
-    layer_1 = np.array([[0, 255], [255, 255]])
+layer_1 = c.load_file()
 
 tsp_computer = TSPComputer(layer_1)
 
@@ -52,10 +86,10 @@ minibatch_size = 32
 observation_shape = (base_observation.shape[1], base_observation.shape[2], base_observation.shape[0])
 replay_memory_capacity = int(1e6)
 
-agent = Agent(action_space, gamma, minibatch_size, observation_shape, replay_memory_capacity, test)
+agent = Agent(action_space, gamma, minibatch_size, observation_shape, replay_memory_capacity, c)
 
-initial_epsilon = 1 if not test else 0
-final_epsilon = 0.1 if not test else initial_epsilon
+initial_epsilon = 1 if not c.test else 0
+final_epsilon = 0.1 if not c.test else initial_epsilon
 final_exploration_frame = int(1e6)
 delta_epsilon = (initial_epsilon - final_epsilon) / final_exploration_frame
 
@@ -77,9 +111,9 @@ target_network_update_frequency = int(10e3)
 
 update_frequency = 4
 
-nb_episodes = int(300e3) if not test else 1
+nb_episodes = int(300e3) if not c.test else 1
 episodes_per_epoch = int(1e4)
-if two_by_two:
+if layer_1.shape == (2, 2):
     div_by = 1
     nb_episodes = int(nb_episodes / div_by)
     episodes_per_epoch = int(episodes_per_epoch / div_by)
@@ -105,7 +139,7 @@ while completed_episodes < nb_episodes:
 
     dqn_env = DqnEnv()
     ep_reward = 0.0
-    while not episode_done and not (test and t >= 1000):
+    while not episode_done and not (c.test and t >= 1000):
         # Choose an action based on observation and exploration probability
         a_t = agent.act(o_t)
 
@@ -130,11 +164,11 @@ while completed_episodes < nb_episodes:
         ep_reward += r_tp1
 
         if episode_done:
-            if not test and max_reward <= ep_reward:
+            if not c.test and max_reward <= ep_reward:
                 str_out = 'max_reward={} <= ep_reward={}'.format(max_reward, ep_reward)
                 max_reward = ep_reward
                 agent.save(global_step=t)
-                if debug:
+                if c.debug:
                     print('Saved graph: ')
                     agent.print_vars()
                     print('saving done')
@@ -146,7 +180,7 @@ while completed_episodes < nb_episodes:
 
         # No changes to either Q and target Q network until the replay memory has been filled
         # with <replay_start_size> random transitions
-        if not test and number_of_observations_experienced >= replay_start_size:
+        if not c.test and number_of_observations_experienced >= replay_start_size:
 
             # Train the Q network once every <update_frequency> iterations
             if number_of_observations_experienced % update_frequency == 0:
@@ -165,18 +199,17 @@ while completed_episodes < nb_episodes:
         number_of_observations_experienced += 1
         o_t = o_tp1
 
-    if completed_episodes % episodes_per_epoch == 0 or test:
+    if completed_episodes % episodes_per_epoch == 0 or c.test:
         print('Episode ', completed_episodes, ', mean reward over last ', episodes_per_epoch, ' episodes: ',
               np.mean(episode_reward[-episodes_per_epoch:]) if len(episode_reward) >= episodes_per_epoch else 0)
         print('Epsilon: ', agent.epsilon)
         print('RL steps: ', dqn_env.steps, ', reward: ' + str(ep_reward), ', done: ', episode_done)
-        print('steps', len(dqn_env.steps) , 'coords: ', len(tsp_computer.coords.keys()))
+        print('Steps: ', len(dqn_env.steps) , ', coords: ', len(tsp_computer.coords.keys()))
         if episode_done and len(dqn_env.steps) == len(tsp_computer.coords.keys()):
             print('tsp_cost', tsp_computer.tsp_cost(dqn_env.steps[0]))
             print('rl_cost', tsp_computer.rl_cost(dqn_env.steps))
 
-
-save_dir = 'out'
+save_dir = c.get_out_dir()
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 np.save(os.path.join(save_dir, 'dqn2_toy_reward'), np.array(episode_reward))
