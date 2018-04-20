@@ -54,7 +54,7 @@ class Config:
 c = Config(
     data_file='2x2',
     test=False,
-    reuse_weights='2x2', # None or file name
+    reuse_weights=None, # or file name
     debug=False
 )
 
