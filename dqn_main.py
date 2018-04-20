@@ -40,7 +40,7 @@ class Config:
 
     def load_file(self):
         if self.data_file == '2x2':
-            return np.array([[0, 255], [0, 255]])
+            return np.array([[0, 255], [255, 255]]) # tree cells for LKH
         else:
             return np.load(os.path.join('data', self.data_file))
 
@@ -204,7 +204,7 @@ while completed_episodes < nb_episodes:
               np.mean(episode_reward[-episodes_per_epoch:]) if len(episode_reward) >= episodes_per_epoch else 0)
         print('Epsilon: ', agent.epsilon)
         print('RL steps: ', dqn_env.steps, ', reward: ' + str(ep_reward), ', done: ', episode_done)
-        print('Steps: ', len(dqn_env.steps) , ', coords: ', len(tsp_computer.coords.keys()))
+        print('Steps: ', len(dqn_env.steps), ', coords: ', len(tsp_computer.coords.keys()))
         if episode_done and len(dqn_env.steps) == len(tsp_computer.coords.keys()):
             print('tsp_cost', tsp_computer.tsp_cost(dqn_env.steps[0]))
             print('rl_cost', tsp_computer.rl_cost(dqn_env.steps))
