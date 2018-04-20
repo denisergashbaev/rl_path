@@ -7,12 +7,18 @@ from dqn_env import DqnEnv
 from dqn_agent import Agent
 import os
 import copy
+from utils import logging_setup
+import logging
 
 
 ##### DQN #####
 
 # ~~~ Embroidery specific ~~~ #
 from pytsp.tsp_computer import TSPComputer
+
+log = logging.getLogger(__name__)
+
+logging_setup.init()
 
 
 class Config:
@@ -48,7 +54,7 @@ class Config:
 c = Config(
     data_file='2x2',
     test=False,
-    reuse_weights='2x2', # None or file name
+    reuse_weights=None, # or file name
     debug=False
 )
 
@@ -135,7 +141,7 @@ while completed_episodes < nb_episodes:
     o_t = np.copy(base_observation)
     episode_done = False
 
-    # print(o_t)
+    # log.debug((o_t)
 
     dqn_env = DqnEnv()
     ep_reward = 0.0
@@ -145,14 +151,14 @@ while completed_episodes < nb_episodes:
 
         a_t_mapped = actions[a_t]
 
-        # print(a_t_mapped)
+        # log.debug((a_t_mapped)
 
         # Take a step in the environment based on chosen action and observe the outcome
         o_tp1, r_tp1, episode_done = dqn_env.step(o_t, a_t_mapped)
 
-        # print(o_tp1)
-        # print(r_tp1)
-        # print("\n")
+        # log.debug((o_tp1)
+        # log.debug((r_tp1)
+        # log.debug(("\n")
 
         # Update the replay memory
 
@@ -169,10 +175,10 @@ while completed_episodes < nb_episodes:
                 max_reward = ep_reward
                 agent.save(global_step=t)
                 if c.debug:
-                    print('Saved graph: ')
+                    log.debug('Saved graph: ')
                     agent.print_vars()
-                    print('saving done')
-                    print('steps: ', dqn_env.steps, ', reward: ' + str(ep_reward), 'str_out=', str_out)
+                    log.debug('saving done')
+                    log.debug('steps: {}, reward: {}, str_out={}'.format(dqn_env.steps, ep_reward, str_out))
             completed_episodes += 1
             episode_reward.append(ep_reward)
 
@@ -200,14 +206,14 @@ while completed_episodes < nb_episodes:
         o_t = o_tp1
 
     if completed_episodes % episodes_per_epoch == 0 or c.test:
-        print('Episode ', completed_episodes, ', mean reward over last ', episodes_per_epoch, ' episodes: ',
-              np.mean(episode_reward[-episodes_per_epoch:]) if len(episode_reward) >= episodes_per_epoch else 0)
-        print('Epsilon: ', agent.epsilon)
-        print('RL steps: ', dqn_env.steps, ', reward: ' + str(ep_reward), ', done: ', episode_done)
-        print('Steps: ', len(dqn_env.steps), ', coords: ', len(tsp_computer.coords.keys()))
+        log.debug('Episode {}, mean reward over last {} episodes: {}'.format(completed_episodes, episodes_per_epoch,
+              np.mean(episode_reward[-episodes_per_epoch:]) if len(episode_reward) >= episodes_per_epoch else 0))
+        log.debug('Epsilon: {}'.format(agent.epsilon))
+        log.debug('RL steps: {}, reward: {}, done: {}'.format(dqn_env.steps, ep_reward, episode_done))
+        log.debug('Steps: {}, coords: {}'.format(len(dqn_env.steps), len(tsp_computer.coords.keys())))
         if episode_done and len(dqn_env.steps) == len(tsp_computer.coords.keys()):
-            print('tsp_cost', tsp_computer.tsp_cost(dqn_env.steps[0]))
-            print('rl_cost', tsp_computer.rl_cost(dqn_env.steps))
+            log.debug('tsp_cost {}'.format(tsp_computer.tsp_cost(dqn_env.steps[0])))
+            print('rl_cost {}'.format(tsp_computer.rl_cost(dqn_env.steps)))
 
 save_dir = c.get_out_dir()
 if not os.path.exists(save_dir):

@@ -3,6 +3,9 @@ import tensorflow as tf
 import numpy as np
 import random
 import shutil
+import logging
+
+log = logging.getLogger(__name__)
 
 
 
@@ -149,14 +152,13 @@ class Agent:
     def print_vars(self):
         graph = tf.get_default_graph()
         for v in [v for v in tf.trainable_variables()]:
-            print("\n")
             #print(v[0])
             # It will give tensor object
             var = graph.get_tensor_by_name(v.name)
 
             # To get the value (numpy array)
             var_value = self.sess.run(var)
-            print('var_name:', v.name, '\nvar_value: ', var_value)
+            log.debug('var_name: {}, var_value {}: '.format(v.name, var_value))
 
     # Update target Q network weights to be equal to the Q network weights
     def update_target_Q_network_weights(self, ignore=False):

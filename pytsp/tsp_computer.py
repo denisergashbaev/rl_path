@@ -2,7 +2,9 @@ from scipy.spatial.distance import cdist
 from pytsp import run, dumps_matrix
 from collections import OrderedDict
 import numpy as np
+import logging
 
+log = logging.getLogger(__name__)
 
 class TSPComputer:
 
@@ -31,5 +33,5 @@ class TSPComputer:
         with open(out_f, 'w') as dest:
             dest.write(dumps_matrix(self.dist_matrix, name="TSP_Route"))
         tour = run(out_f, start=self.back_coords[start_coord], solver="lkh")
-        print("tour", tour)
+        log.debug("tour", tour)
         return tour['solution']
