@@ -6,12 +6,12 @@ import logging
 
 log = logging.getLogger(__name__)
 
-class TSPComputer:
 
-    def __init__(self, layer_1):
+class TSPComputer:
+    def __init__(self, layer):
         self.coords = OrderedDict()
         self.back_coords = {}
-        for (x, y), value in np.ndenumerate(layer_1):
+        for (x, y), value in np.ndenumerate(layer):
             if value > 0:
                 i = len(self.coords.keys())
                 c = (x, y)
