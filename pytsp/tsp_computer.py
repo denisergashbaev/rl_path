@@ -21,17 +21,19 @@ class TSPComputer:
         self.dist_matrix = cdist(coords_arr, coords_arr, metric='cityblock')
 
     def rl_cost(self, coords):
-        cost = 0
-        idx = [self.back_coords[c] for c in coords]
-        for p0 in idx:
-            p1 = p0 + 1 if p0 < len(idx) - 1 else 0
-            cost += self.dist_matrix[p0][p1]
-        return cost
+        return self.idx_cost([self.back_coords[c] for c in coords])
 
     def tsp_cost(self, start_coord):
         out_f = "./tsp_dist.tsp"
         with open(out_f, 'w') as dest:
             dest.write(dumps_matrix(self.dist_matrix, name="TSP_Route"))
         tour = run(out_f, start=self.back_coords[start_coord], solver="lkh")
-        log.debug("tour", tour)
+        log.debug('tour', tour)
         return tour['solution']
+
+    def idx_cost(self, idx):
+        cost = 0
+        for p0 in idx:
+            p1 = idx[p0 + 1] if p0 < len(idx) - 1 else 0
+            cost += self.dist_matrix[p0][p1]
+        return cost

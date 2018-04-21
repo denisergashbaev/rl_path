@@ -142,7 +142,7 @@ class Agent:
         # Initialize neural network weights and biases ...
         self.sess.run(tf.global_variables_initializer())
         # https://stackoverflow.com/questions/33759623/tensorflow-how-to-save-restore-a-model/33763208#33763208
-        if self.c.reuse_weights:
+        if self.c.reuse_weights or self.c.test:
             self.saver.restore(sess=self.sess, save_path=tf.train.latest_checkpoint(self.c.get_checkpoints_load_dir()))
 
         # ... and make the Q and target Q networks equal

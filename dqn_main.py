@@ -42,6 +42,8 @@ class Config:
         if self.reuse_weights:
             c2.reuse_weights = None
             c2.data_file = self.reuse_weights
+        if self.test:
+            c2.test = False
         return os.path.join('checkpoints', c2.get_name())
 
     def load_file(self):
