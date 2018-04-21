@@ -11,14 +11,7 @@ from pytsp.tsp_computer import TSPComputer
 fig, ax = plt.subplots()
 
 #imshow portion
-layer = np.load(os.path.join('data', '0_13.npy'))
-#layer = np.array([[0.1,0.2],[1.1,1.2]])
-#layer = layer[0:3][:]
-
-
-#text portion
-#ind_array = np.arange(min_val, max_val, diff)
-#x, y = np.meshgrid(ind_array, ind_array)
+layer = np.load(os.path.join('data', '7_17.npy'))
 
 tsp = TSPComputer(layer)
 for (x, y), value in np.ndenumerate(layer):
@@ -37,16 +30,17 @@ ax.set_yticklabels([])
 ax.grid()
 im = ax.imshow(layer, interpolation=None, animated=True)
 
+tsp_path = [0, 1, 2, 3, 4, 11, 12, 5, 6, 13, 14, 19, 23, 22, 18, 17, 21, 26, 27, 32, 31, 36, 35, 34, 38, 39, 37, 33, 28, 29, 30, 25, 24, 20, 16, 15, 10, 9, 8, 7]
+print('tsp_cost:', tsp.tsp_cost((2, 1)))
+print('tsp_check_cost:', tsp.idx_cost(tsp_path))
 
 def update(i):
-    for (x, y), value in np.ndenumerate(layer):
-        if (x, y) in tsp.back_coords:
-            v = tsp.back_coords[(x, y)]
-            if v == i:
-                for t in ax.texts:
-                    if t._x == y and t._y == x:
-                        t._text = 'X'
+    r = tsp_path[i]
+    if r in tsp.coords:
+        for t in ax.texts:
+            c = tsp.coords[r]
+            if (t._x, t._y) == (c[1], c[0]):
+                t._text = 'X'
 
-
-ani = animation.FuncAnimation(fig, update, frames=19, interval=1000)
+ani = animation.FuncAnimation(fig, update, frames=len(tsp_path), interval=500)
 plt.show()
