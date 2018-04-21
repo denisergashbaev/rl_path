@@ -52,7 +52,7 @@ class Config:
 
 
 c = Config(
-    data_file='7_17.npy',
+    data_file='0_13.npy',
     test=False,
     reuse_weights=None, # or file name
     debug=False
@@ -119,7 +119,7 @@ target_network_update_frequency = int(10e3)
 
 update_frequency = 4
 
-nb_episodes = int(1000e3) if not c.test else 1
+nb_episodes = int(300e3) if not c.test else 1
 episodes_per_epoch = int(1e4)
 if layer_1.shape == (2, 2):
     div_by = 1

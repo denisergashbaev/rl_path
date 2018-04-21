@@ -11,7 +11,7 @@ from pytsp.tsp_computer import TSPComputer
 fig, ax = plt.subplots()
 
 #imshow portion
-layer = np.load(os.path.join('data', '7_17.npy'))
+layer = np.load(os.path.join('data', '0_13.npy'))
 #layer = np.array([[0.1,0.2],[1.1,1.2]])
 #layer = layer[0:3][:]
 
