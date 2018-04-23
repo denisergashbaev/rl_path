@@ -54,10 +54,10 @@ class Config:
         return a
 
 c = Config(
-    data_file='2x2.npy', # 2x2.npy, 7_17.npy, 0_13.npy
-    step_reward=-0.1, #-0.1, -0.5, -1
-    fast_fail=True,
-    reuse_weights=False, # False or folder name
+    data_file='0_13.npy', # 2x2.npy, 7_17.npy, 0_13.npy
+    step_reward=-1, #-0.1, -0.5, -1
+    fast_fail=False,
+    reuse_weights='data_file=0_13.npy,step_reward=-0.5,fast_fail=True,reuse_weights=False,test=False', # False or folder name
     test=False,
     debug=False
 )
