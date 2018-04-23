@@ -54,15 +54,7 @@ class Config:
         return a
 
 if True:
-    c = Config(
-        data_file='0_13.npy', # 2x2.npy, 7_17.npy, 0_13.npy
-        step_reward=-1, #-0.1, -0.5, -1
-        fast_fail=False,
-        reuse_weights='data_file=0_13.npy,step_reward=-1,fast_fail=False,reuse_weights=True,test=False', # False or folder name
-        test=True,
-        debug=False
-    )
-else:
+    #training
     c = Config(
         data_file='0_13.npy',  # 2x2.npy, 7_17.npy, 0_13.npy
         step_reward=-1,  # -0.1, -0.5, -1
@@ -70,6 +62,16 @@ else:
         reuse_weights='data_file=0_13.npy,step_reward=-0.5,fast_fail=True,reuse_weights=False,test=False',
         # False or folder name
         test=False,
+        debug=False
+    )
+else:
+    #testing
+    c = Config(
+        data_file='0_13.npy', # 2x2.npy, 7_17.npy, 0_13.npy
+        step_reward=-1, #-0.1, -0.5, -1
+        fast_fail=False,
+        reuse_weights='data_file=0_13.npy,step_reward=-1,fast_fail=False,reuse_weights=True,test=False', # False or folder name
+        test=True,
         debug=False
     )
 
