@@ -142,7 +142,9 @@ class Agent:
         self.sess.run(tf.global_variables_initializer())
         # https://stackoverflow.com/questions/33759623/tensorflow-how-to-save-restore-a-model/33763208#33763208
         if self.c.reuse_weights or self.c.test:
-            self.saver.restore(sess=self.sess, save_path=tf.train.latest_checkpoint(self.c.get_checkpoints_load_dir()))
+            folder_name = self.c.get_checkpoints_load_dir()
+            log.debug('loading checkpoint from {}'.format(folder_name))
+            self.saver.restore(sess=self.sess, save_path=tf.train.latest_checkpoint(folder_name))
 
         # ... and make the Q and target Q networks equal
         self.update_target_Q_network_weights(ignore=True)

@@ -53,14 +53,25 @@ class Config:
         a = np.load(os.path.join('data', self.data_file))
         return a
 
-c = Config(
-    data_file='0_13.npy', # 2x2.npy, 7_17.npy, 0_13.npy
-    step_reward=-1, #-0.1, -0.5, -1
-    fast_fail=False,
-    reuse_weights='data_file=0_13.npy,step_reward=-0.5,fast_fail=True,reuse_weights=False,test=False', # False or folder name
-    test=False,
-    debug=False
-)
+if True:
+    c = Config(
+        data_file='0_13.npy', # 2x2.npy, 7_17.npy, 0_13.npy
+        step_reward=-1, #-0.1, -0.5, -1
+        fast_fail=False,
+        reuse_weights='data_file=0_13.npy,step_reward=-1,fast_fail=False,reuse_weights=True,test=False', # False or folder name
+        test=True,
+        debug=False
+    )
+else:
+    c = Config(
+        data_file='0_13.npy',  # 2x2.npy, 7_17.npy, 0_13.npy
+        step_reward=-1,  # -0.1, -0.5, -1
+        fast_fail=False,
+        reuse_weights='data_file=0_13.npy,step_reward=-0.5,fast_fail=True,reuse_weights=False,test=False',
+        # False or folder name
+        test=False,
+        debug=False
+    )
 
 log.debug('>>>> RUNNING {}<<<<'.format(c.get_name()))
 
@@ -153,7 +164,7 @@ while completed_episodes < nb_episodes:
 
     dqn_env = DqnEnv(c)
     ep_reward = 0.0
-    while not episode_done and not (c.test and t >= 1000):
+    while not episode_done:
         # Choose an action based on observation and exploration probability
         a_t = agent.act(o_t)
 
@@ -177,8 +188,8 @@ while completed_episodes < nb_episodes:
 
         ep_reward += r_tp1
 
-        if episode_done:
-            if not c.test and max_reward <= ep_reward:
+        if not c.test and episode_done:
+            if max_reward <= ep_reward:
                 str_out = 'max_reward={} <= ep_reward={}'.format(max_reward, ep_reward)
                 max_reward = ep_reward
                 agent.save(global_step=global_step)
@@ -221,11 +232,12 @@ while completed_episodes < nb_episodes:
         log.debug('Steps: {}, coords: {}'.format(len(dqn_env.steps), len(tsp_computer.coords.keys())))
         if episode_done and len(dqn_env.steps) == len(tsp_computer.coords.keys()):
             log.debug('tsp_cost {}'.format(tsp_computer.tsp_cost(dqn_env.steps[0])))
-            print('rl_cost {}'.format(tsp_computer.rl_cost(dqn_env.steps)))
+            log.debug('rl_cost {}'.format(tsp_computer.rl_cost(dqn_env.steps)))
 
-    save_dir = c.get_out_dir()
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    np.save(os.path.join(save_dir, 'episode_reward'), np.array(episode_reward))
-    np.save(os.path.join(save_dir, 'episode_length'), np.array(episode_length))
-    np.save(os.path.join(save_dir, 'rl_cost'), np.array(rl_cost))
+    if not c.test:
+        save_dir = c.get_out_dir()
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        np.save(os.path.join(save_dir, 'episode_reward'), np.array(episode_reward))
+        np.save(os.path.join(save_dir, 'episode_length'), np.array(episode_length))
+        np.save(os.path.join(save_dir, 'rl_cost'), np.array(rl_cost))
