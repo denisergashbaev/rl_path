@@ -141,6 +141,7 @@ number_of_observations_experienced = 0
 # ~~~ ~~~ #
 
 max_reward = -math.inf
+global_step = 0
 
 while completed_episodes < nb_episodes:
 
@@ -180,12 +181,11 @@ while completed_episodes < nb_episodes:
             if not c.test and max_reward <= ep_reward:
                 str_out = 'max_reward={} <= ep_reward={}'.format(max_reward, ep_reward)
                 max_reward = ep_reward
-                agent.save(global_step=t)
-                if c.debug:
-                    log.debug('Saved graph: ')
-                    agent.print_vars()
-                    log.debug('saving done')
-                    log.debug('steps: {}, reward: {}, str_out={}'.format(dqn_env.steps, ep_reward, str_out))
+                agent.save(global_step=global_step)
+                log.debug('saving graph {} -> steps: \n{}, \nstep_length: {}, rl_cost: {}, reward: {}, str_out={}'
+                          .format(global_step, dqn_env.steps, len(dqn_env.steps),
+                                  tsp_computer.rl_cost(dqn_env.steps),
+                                  ep_reward, str_out))
             completed_episodes += 1
             episode_reward.append(ep_reward)
             episode_length.append(t)
@@ -209,6 +209,7 @@ while completed_episodes < nb_episodes:
 
         # New timestep
         t += 1
+        global_step += 1
         number_of_observations_experienced += 1
         o_t = o_tp1
 
