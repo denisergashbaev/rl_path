@@ -134,6 +134,7 @@ completed_episodes = 0
 
 episode_reward = []
 episode_length = []
+rl_cost = []
 
 number_of_observations_experienced = 0
 
@@ -187,8 +188,8 @@ while completed_episodes < nb_episodes:
                     log.debug('steps: {}, reward: {}, str_out={}'.format(dqn_env.steps, ep_reward, str_out))
             completed_episodes += 1
             episode_reward.append(ep_reward)
-
             episode_length.append(t)
+            rl_cost.append(tsp_computer.rl_cost(dqn_env.steps))
 
         # No changes to either Q and target Q network until the replay memory has been filled
         # with <replay_start_size> random transitions
@@ -226,3 +227,4 @@ while completed_episodes < nb_episodes:
         os.makedirs(save_dir)
     np.save(os.path.join(save_dir, 'episode_reward'), np.array(episode_reward))
     np.save(os.path.join(save_dir, 'episode_length'), np.array(episode_length))
+    np.save(os.path.join(save_dir, 'rl_cost'), np.array(rl_cost))
