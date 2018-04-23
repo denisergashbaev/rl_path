@@ -22,14 +22,18 @@ logging_setup.init()
 
 
 class Config:
-    def __init__(self, data_file, test, reuse_weights, debug):
+    def __init__(self, data_file, step_reward, fast_fail, reuse_weights, test, debug):
         self.data_file = data_file
-        self.test = test
+        self.step_reward = step_reward
+        self.fast_fail = fast_fail
         self.reuse_weights = reuse_weights
+        self.test = test
         self.debug = debug
 
     def get_name(self):
-        return 'data_file={},reuse_weights={},test={}'.format(self.data_file, self.reuse_weights, self.test)
+        return 'data_file={},step_reward={},fast_fail={},reuse_weights={},test={}'.\
+            format(self.data_file, self.step_reward, self.fast_fail,
+                   self.reuse_weights is not False, self.test)
 
     def get_out_dir(self):
         return os.path.join('out', self.get_name())
@@ -39,24 +43,26 @@ class Config:
 
     def get_checkpoints_load_dir(self):
         c2 = copy.copy(self)
-        if self.reuse_weights:
-            c2.reuse_weights = None
-            c2.data_file = self.reuse_weights
         if self.test:
             c2.test = False
-        return os.path.join('checkpoints', c2.get_name())
+            return os.path.join('checkpoints', c2.get_name())
+        elif self.reuse_weights:
+            return os.path.join('checkpoints', c2.reuse_weights)
 
     def load_file(self):
         if self.data_file == '2x2':
             return np.array([[0, 255], [255, 255]]) # tree cells for LKH
         else:
-            return np.load(os.path.join('data', self.data_file))
+            a = np.load(os.path.join('data', self.data_file))
+            return a
 
 
 c = Config(
     data_file='0_13.npy',
-    test=False,
-    reuse_weights=None, # or file name
+    step_reward=-0.1, #-0.1, -0.5, -1
+    fast_fail=True,
+    reuse_weights=False, # False or folder name
+    test=True,
     debug=False
 )
 
@@ -147,7 +153,7 @@ while completed_episodes < nb_episodes:
 
     # log.debug((o_t)
 
-    dqn_env = DqnEnv()
+    dqn_env = DqnEnv(c)
     ep_reward = 0.0
     while not episode_done and not (c.test and t >= 1000):
         # Choose an action based on observation and exploration probability
@@ -219,8 +225,8 @@ while completed_episodes < nb_episodes:
             log.debug('tsp_cost {}'.format(tsp_computer.tsp_cost(dqn_env.steps[0])))
             print('rl_cost {}'.format(tsp_computer.rl_cost(dqn_env.steps)))
 
-save_dir = c.get_out_dir()
-if not os.path.exists(save_dir):
-    os.makedirs(save_dir)
-np.save(os.path.join(save_dir, 'dqn2_toy_reward'), np.array(episode_reward))
-np.save(os.path.join(save_dir, 'dqn2_toy_length'), np.array(episode_length))
+    save_dir = c.get_out_dir()
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    np.save(os.path.join(save_dir, 'episode_reward'), np.array(episode_reward))
+    np.save(os.path.join(save_dir, 'episode_length'), np.array(episode_length))

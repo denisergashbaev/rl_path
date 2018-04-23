@@ -6,8 +6,9 @@ log = logging.getLogger(__name__)
 
 class DqnEnv:
 
-    def __init__(self):
+    def __init__(self, c):
         self.steps = []
+        self.c = c
 
     # Color code
 
@@ -36,12 +37,12 @@ class DqnEnv:
 
         r_tp1 = 0
 
-        step_cost = -0.1
+        step_reward = self.c.step_reward
         done = False
 
         if a_t == 'r':
 
-            r_tp1 = step_cost
+            r_tp1 = step_reward
             if agent_position[1] < y_upper_boundary:
 
                 new_agent_position = tuple(np.array(agent_position) + (0, +1))
@@ -51,7 +52,7 @@ class DqnEnv:
 
         elif a_t == 'l':
 
-            r_tp1 = step_cost
+            r_tp1 = step_reward
             if agent_position[1] > y_lower_boundary:
 
                 new_agent_position = tuple(np.array(agent_position) + (0, -1))
@@ -60,7 +61,7 @@ class DqnEnv:
 
         elif a_t == 'd':
 
-            r_tp1 = step_cost
+            r_tp1 = step_reward
             if agent_position[0] < x_upper_boundary:
 
                 new_agent_position = tuple(np.array(agent_position) + (+1, 0))
@@ -70,7 +71,7 @@ class DqnEnv:
 
         elif a_t == 'u':
 
-            r_tp1 = step_cost
+            r_tp1 = step_reward
             if agent_position[0] > x_lower_boundary:
 
                 new_agent_position = tuple(np.array(agent_position) + (-1, 0))
@@ -90,7 +91,7 @@ class DqnEnv:
             # Else, penalize the agent for trying to stitch in a wrong position
             else:
                 r_tp1 = -1
-                done = True
+                done = self.c.fast_fail
 
 
         # The agent is done stitching if there aren't any Color Cells or Color + Agent Cells

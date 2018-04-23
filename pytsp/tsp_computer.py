@@ -24,12 +24,17 @@ class TSPComputer:
         return self.idx_cost([self.back_coords[c] for c in coords])
 
     def tsp_cost(self, start_coord):
+        return self.tsp(start_coord)['solution']
+
+    def tsp_path(self, start_coord):
+        return self.tsp(start_coord)['tour']
+
+    def tsp(self, start_coord):
         out_f = "./tsp_dist.tsp"
         with open(out_f, 'w') as dest:
             dest.write(dumps_matrix(self.dist_matrix, name="TSP_Route"))
         tour = run(out_f, start=self.back_coords[start_coord], solver="lkh")
-        log.debug('tour', tour)
-        return tour['solution']
+        return tour
 
     def idx_cost(self, idx):
         cost = 0
