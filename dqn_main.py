@@ -50,19 +50,15 @@ class Config:
             return os.path.join('checkpoints', c2.reuse_weights)
 
     def load_file(self):
-        if self.data_file == '2x2':
-            return np.array([[0, 255], [255, 255]]) # tree cells for LKH
-        else:
-            a = np.load(os.path.join('data', self.data_file))
-            return a
-
+        a = np.load(os.path.join('data', self.data_file))
+        return a
 
 c = Config(
-    data_file='0_13.npy',
+    data_file='2x2.npy', # 2x2.npy, 7_17.npy, 0_13.npy
     step_reward=-0.1, #-0.1, -0.5, -1
     fast_fail=True,
     reuse_weights=False, # False or folder name
-    test=True,
+    test=False,
     debug=False
 )
 
