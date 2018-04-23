@@ -57,8 +57,8 @@ if True:
     #training
     c = Config(
         data_file='0_13.npy',  # 2x2.npy, 7_17.npy, 0_13.npy
-        step_reward=-1,  # -0.1, -0.5, -1
-        fast_fail=False,
+        step_reward=-0.01,  # -0.1, -0.5, -1
+        fast_fail=True,
         reuse_weights='data_file=0_13.npy,step_reward=-0.5,fast_fail=True,reuse_weights=False,test=False',
         # False or folder name
         test=False,
@@ -68,7 +68,7 @@ else:
     #testing
     c = Config(
         data_file='0_13.npy', # 2x2.npy, 7_17.npy, 0_13.npy
-        step_reward=-1, #-0.1, -0.5, -1
+        step_reward=-0.2, #-0.1, -0.5, -1
         fast_fail=False,
         reuse_weights='data_file=0_13.npy,step_reward=-1,fast_fail=False,reuse_weights=True,test=False', # False or folder name
         test=True,
@@ -225,6 +225,8 @@ while completed_episodes < nb_episodes:
         global_step += 1
         number_of_observations_experienced += 1
         o_t = o_tp1
+        if c.test:
+            log.debug('iteration {}, steps length: {}, steps: {}'.format(t, len(dqn_env.steps), dqn_env.steps))
 
     if completed_episodes % episodes_per_epoch == 0 or c.test:
         log.debug('Episode {}, mean reward over last {} episodes: {}'.format(completed_episodes, episodes_per_epoch,

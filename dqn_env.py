@@ -49,6 +49,8 @@ class DqnEnv:
 
                 s_tp1[1][agent_position] -= 255
                 s_tp1[1][new_agent_position] += 255
+            elif self.c.test:
+                log.debug('out of boundary')
 
         elif a_t == 'l':
 
@@ -58,6 +60,8 @@ class DqnEnv:
                 new_agent_position = tuple(np.array(agent_position) + (0, -1))
                 s_tp1[1][agent_position] -= 255
                 s_tp1[1][new_agent_position] += 255
+            elif self.c.test:
+                log.debug('out of boundary')
 
         elif a_t == 'd':
 
@@ -68,6 +72,8 @@ class DqnEnv:
 
                 s_tp1[1][agent_position] -= 255
                 s_tp1[1][new_agent_position] += 255
+            elif self.c.test:
+                log.debug('out of boundary')
 
         elif a_t == 'u':
 
@@ -78,6 +84,8 @@ class DqnEnv:
 
                 s_tp1[1][agent_position] -= 255
                 s_tp1[1][new_agent_position] += 255
+            elif self.c.test:
+                log.debug('out of boundary')
 
         elif a_t == 's':
 
@@ -91,7 +99,9 @@ class DqnEnv:
             # Else, penalize the agent for trying to stitch in a wrong position
             else:
                 r_tp1 = -1
-                done = self.c.fast_fail
+                done = self.c.fast_fail or self.c.test
+                if self.c.test:
+                    log.debug('double stitch')
 
 
         # The agent is done stitching if there aren't any Color Cells or Color + Agent Cells
