@@ -75,12 +75,11 @@ class Agent:
         self.train_op = self.optimizer.apply_gradients(self.gradients)
 
         self.saver = tf.train.Saver()
-        self.save_dir = self.c.get_checkpoints_save_dir()
-        if not os.path.exists(self.save_dir):
-            os.makedirs(self.save_dir)
         if not c.test:
-            shutil.rmtree(self.save_dir)
-            # ~~~ ~~~ #
+            self.save_dir = self.c.get_checkpoints_save_dir()
+            if not os.path.exists(self.save_dir):
+                os.makedirs(self.save_dir)
+                shutil.rmtree(self.save_dir)
 
     # Q Function approximator based on some observation and network weights (scope)
     def Q(self, observation, scope):
