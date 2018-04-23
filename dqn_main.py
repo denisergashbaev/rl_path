@@ -155,7 +155,10 @@ number_of_observations_experienced = 0
 
 max_reward = -math.inf
 global_step = 0
-
+best_tsp = math.inf
+save_dir = c.get_out_dir()
+if not os.path.exists(save_dir):
+    os.makedirs(save_dir)
 while completed_episodes < nb_episodes:
 
     t = 0
@@ -191,14 +194,20 @@ while completed_episodes < nb_episodes:
         ep_reward += r_tp1
 
         if not c.test and episode_done:
+            tsp_cost = tsp_computer.rl_cost(dqn_env.steps)
             if max_reward <= ep_reward:
                 str_out = 'max_reward={} <= ep_reward={}'.format(max_reward, ep_reward)
                 max_reward = ep_reward
                 agent.save(global_step=global_step)
                 log.debug('saving graph {} -> steps: \n{}, \nstep_length: {}, rl_cost: {}, reward: {}, str_out={}'
                           .format(global_step, dqn_env.steps, len(dqn_env.steps),
-                                  tsp_computer.rl_cost(dqn_env.steps),
+                                  tsp_cost,
                                   ep_reward, str_out))
+            if best_tsp > tsp_cost:
+                best_tsp = tsp_cost
+                with open(os.path.join(save_dir, "path.txt"), "a") as myfile:
+                    myfile.write('{}: {}'.format(tsp_cost, dqn_env.steps))
+
             completed_episodes += 1
             episode_reward.append(ep_reward)
             episode_length.append(t)
@@ -239,9 +248,6 @@ while completed_episodes < nb_episodes:
             log.debug('rl_cost {}'.format(tsp_computer.rl_cost(dqn_env.steps)))
 
     if not c.test:
-        save_dir = c.get_out_dir()
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
         np.save(os.path.join(save_dir, 'episode_reward'), np.array(episode_reward))
         np.save(os.path.join(save_dir, 'episode_length'), np.array(episode_length))
         np.save(os.path.join(save_dir, 'rl_cost'), np.array(rl_cost))
