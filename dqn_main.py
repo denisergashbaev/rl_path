@@ -57,7 +57,7 @@ if True:
     #training
     c = Config(
         data_file='0_13.npy',  # 2x2.npy, 7_17.npy, 0_13.npy
-        step_reward=-0.05,  # -0.1, -0.5, -1
+        step_reward=-0.09,  # -0.1, -0.5, -1
         fast_fail=True,
         reuse_weights='data_file=0_13.npy,step_reward=-0.01,fast_fail=True,reuse_weights=True,test=False',
         # False or folder name
