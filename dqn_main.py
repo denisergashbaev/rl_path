@@ -2,6 +2,7 @@
 import math
 
 import numpy as np
+import shutil
 
 from dqn_env import DqnEnv
 from dqn_agent import Agent
@@ -157,6 +158,7 @@ max_reward = -math.inf
 global_step = 0
 best_tsp = math.inf
 save_dir = c.get_out_dir()
+shutil.rmtree(save_dir, ignore_errors=True)
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 while completed_episodes < nb_episodes:
@@ -203,10 +205,10 @@ while completed_episodes < nb_episodes:
                           .format(global_step, dqn_env.steps, len(dqn_env.steps),
                                   tsp_cost,
                                   ep_reward, str_out))
-            if best_tsp > tsp_cost:
+            if len(dqn_env.steps) == len(tsp_computer.coords.keys()) and best_tsp > tsp_cost:
                 best_tsp = tsp_cost
                 with open(os.path.join(save_dir, "path.txt"), "a") as myfile:
-                    myfile.write('{}: {}'.format(tsp_cost, dqn_env.steps))
+                    myfile.write('iteration {}, rl_cost {}: {}\n'.format(global_step, tsp_cost, dqn_env.steps))
 
             completed_episodes += 1
             episode_reward.append(ep_reward)
