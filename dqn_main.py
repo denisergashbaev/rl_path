@@ -57,10 +57,10 @@ class Config:
 if True:
     #training
     c = Config(
-        data_file='0_13.npy',  # 2x2.npy, 7_17.npy, 0_13.npy
-        step_reward=-0.09,  # -0.1, -0.5, -1
+        data_file='5_15.npy',  # 2x2.npy, 7_17.npy, 0_13.npy
+        step_reward=-0.1,  # -0.1, -0.5, -1
         fast_fail=True,
-        reuse_weights='data_file=0_13.npy,step_reward=-0.01,fast_fail=True,reuse_weights=True,test=False',
+        reuse_weights='data_file=7_17.npy,step_reward=-0.1,fast_fail=True,reuse_weights=False,test=False',
         # False or folder name
         test=False,
         debug=False
@@ -68,7 +68,7 @@ if True:
 else:
     #testing
     c = Config(
-        data_file='0_13.npy', # 2x2.npy, 7_17.npy, 0_13.npy
+        data_file='7_17.npy', # 2x2.npy, 7_17.npy, 0_13.npy
         step_reward=-0.1, #-0.1, -0.5, -1
         fast_fail=True,
         reuse_weights=False,
@@ -197,8 +197,8 @@ while completed_episodes < nb_episodes:
 
         if not c.test and episode_done:
             tsp_cost = tsp_computer.rl_cost(dqn_env.steps)
-            if max_reward <= ep_reward:
-                str_out = 'max_reward={} <= ep_reward={}'.format(max_reward, ep_reward)
+            if max_reward < ep_reward:
+                str_out = 'max_reward={} < ep_reward={}'.format(max_reward, ep_reward)
                 max_reward = ep_reward
                 agent.save(global_step=global_step)
                 log.debug('saving graph {} -> steps: \n{}, \nstep_length: {}, rl_cost: {}, reward: {}, str_out={}'
