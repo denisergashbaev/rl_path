@@ -68,10 +68,10 @@ if False:
 else:
     #testing
     c = Config(
-        data_file='7_17.npy', # 2x2.npy, 7_17.npy, 0_13.npy
-        step_reward=-0.5, #-0.1, -0.5, -1
+        data_file='5_15.npy', # 2x2.npy, 7_17.npy, 0_13.npy
+        step_reward=-0.1, #-0.1, -0.5, -1
         fast_fail=True,
-        reuse_weights='data_file=7_17.npy,step_reward=-0.5,fast_fail=True,reuse_weights=False,test=False',
+        reuse_weights='data_file=5_15.npy,step_reward=-0.1,fast_fail=True,reuse_weights=True,test=False',
         test=True,
         debug=False
     )
