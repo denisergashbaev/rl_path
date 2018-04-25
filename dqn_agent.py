@@ -28,6 +28,13 @@ class Agent:
         log.debug('device: {}'.format(device_lib.list_local_devices()))
         # ~~~ Create placeholders  ~~~ #
 
+        with tf.device('/GPU:0'):
+            a_test = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[2, 3], name='a')
+            b_test = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[3, 2], name='b')
+        c_test = tf.matmul(a_test, b_test)
+        # Runs the op.
+        log.debug('device_placement: {}'.format(self.sess.run(c_test)))
+
         self.o_t_ph = tf.placeholder(tf.uint8, [None] + list(observation_shape))
         self.a_t_ph = tf.placeholder(tf.int32, [None])
         self.r_tp1_ph = tf.placeholder(tf.float32, [None])
