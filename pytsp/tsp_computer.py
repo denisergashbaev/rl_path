@@ -36,9 +36,11 @@ class TSPComputer:
         tour = run(out_f, start=self.back_coords[start_coord], solver="lkh")
         return tour
 
+    #[0, 1, 2, 3, 4, 10, 16, 17, 23, 29, 35, 34, 41, 47, 46, 50, 49, 48, 44, 45, 39, 40, 33, 27, 28, 22,
+    #                  21, 15, 9, 8, 14, 13, 20, 26, 32, 38, 37, 43, 42, 36, 30, 31, 25, 24, 18, 19, 12, 11, 5, 7, 6]
     def idx_cost(self, idx):
         cost = 0
-        for p0 in idx:
-            p1 = idx[p0 + 1] if p0 < len(idx) - 1 else 0
+        for i, p0 in enumerate(idx):
+            p1 = idx[i +1] if i < len(idx) - 1 else 0
             cost += self.dist_matrix[p0][p1]
         return cost

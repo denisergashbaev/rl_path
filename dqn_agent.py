@@ -141,10 +141,14 @@ class Agent:
         # Initialize neural network weights and biases ...
         self.sess.run(tf.global_variables_initializer())
         # https://stackoverflow.com/questions/33759623/tensorflow-how-to-save-restore-a-model/33763208#33763208
-        if self.c.reuse_weights or self.c.test:
+        folder_name=None
+        if self.c.reuse_weights:
             folder_name = self.c.get_checkpoints_load_dir()
+        if self.c.test:
+            folder_name = self.c.reuse_weights
+        if folder_name:
             log.debug('loading checkpoint from {}'.format(folder_name))
-            self.saver.restore(sess=self.sess, save_path=tf.train.latest_checkpoint(folder_name))
+            self.saver.restore(sess=self.sess, save_path=tf.train.latest_checkpoint(os.path.join('checkpoints', folder_name)))
 
         # ... and make the Q and target Q networks equal
         self.update_target_Q_network_weights(ignore=True)
