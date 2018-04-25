@@ -60,7 +60,7 @@ if True:
         data_file='5_15.npy',  # 2x2.npy, 7_17.npy, 0_13.npy
         step_reward=-0.1,  # -0.1, -0.5, -1
         fast_fail=True,
-        reuse_weights='data_file=7_17.npy,step_reward=-0.1,fast_fail=True,reuse_weights=False,test=False',
+        reuse_weights=False,
         # False or folder name
         test=False,
         debug=False
