@@ -23,7 +23,8 @@ class Agent:
         # Initialize replay memory
         self.replay_memory = ReplayBuffer(replay_memory_capacity)
 
-        self.sess = tf.Session()
+        self.sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+
         # ~~~ Create placeholders  ~~~ #
 
         self.o_t_ph = tf.placeholder(tf.uint8, [None] + list(observation_shape))
