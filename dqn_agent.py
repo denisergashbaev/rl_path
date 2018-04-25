@@ -24,7 +24,8 @@ class Agent:
         self.replay_memory = ReplayBuffer(replay_memory_capacity)
 
         self.sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
-
+        from tensorflow.python.client import device_lib
+        log.debug('device: {}'.format(device_lib.list_local_devices()))
         # ~~~ Create placeholders  ~~~ #
 
         self.o_t_ph = tf.placeholder(tf.uint8, [None] + list(observation_shape))
