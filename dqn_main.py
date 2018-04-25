@@ -54,7 +54,7 @@ class Config:
         a = np.load(os.path.join('data', self.data_file))
         return a
 
-if False:
+if True:
     #training
     c = Config(
         data_file='5_15.npy',  # 2x2.npy, 7_17.npy, 0_13.npy
