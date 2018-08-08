@@ -9,12 +9,6 @@ import sys
 import tensorflow as tf
 import collections
 
-if "../" not in sys.path:
-  sys.path.append("../")
-from lib.envs.cliff_walking import CliffWalkingEnv
-from lib import plotting
-
-env = CliffWalkingEnv()
 env = gym.make('CartPole-v0')
 
 # https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-0-q-learning-with-tables-and-neural-networks-d195264329d0
@@ -31,10 +25,7 @@ learning_rate = 0.01
 
 
 # Superparameters
-OUTPUT_GRAPH = False
-MAX_EPISODE = 3000
 DISPLAY_REWARD_THRESHOLD = 200  # renders environment if total episode reward is greater then this threshold
-MAX_EP_STEPS = 1000   # maximum time step in one episode
 RENDER = False  # rendering wastes time
 
 env = gym.make('CartPole-v0')
@@ -47,8 +38,9 @@ N_A = env.action_space.n
 total_episodes = 5000  # Set total number of episodes to train agent on.
 max_ep = 999
 
+
 class Actor(object):
-    def __init__(self, sess, n_features, n_actions, lr=0.001):
+    def __init__(self, sess, n_features, n_actions, lr):
         self.sess = sess
 
         self.s = tf.placeholder(tf.float32, [1, n_features], "state")
@@ -95,11 +87,12 @@ class Actor(object):
     def choose_action(self, s):
         s = s[np.newaxis, :]
         probs = self.sess.run(self.acts_prob, {self.s: s})   # get probabilities for all actions
+        # numpy.ravel() returns contiguous flattened 1d array
         return np.random.choice(np.arange(probs.shape[1]), p=probs.ravel())   # return a int
 
 
 class Critic(object):
-    def __init__(self, sess, n_features, lr=0.01):
+    def __init__(self, sess, n_features, lr):
         self.sess = sess
 
         self.state = tf.placeholder(tf.float32, [1, n_features], "state")
@@ -142,7 +135,6 @@ class Critic(object):
         return loss
 
 
-
 def actor_critic(env, actor, critic, num_episodes, discount_factor=1.0):
     """
     Actor Critic Algorithm. Optimizes the policy
@@ -160,7 +152,8 @@ def actor_critic(env, actor, critic, num_episodes, discount_factor=1.0):
     """
 
     # Keeps track of useful statistics
-    stats = plotting.EpisodeStats(
+    EpisodeStats = collections.namedtuple("Stats", ["episode_lengths", "episode_rewards"])
+    stats = EpisodeStats(
         episode_lengths=np.zeros(num_episodes),
         episode_rewards=np.zeros(num_episodes))
 
@@ -223,13 +216,11 @@ def actor_critic(env, actor, critic, num_episodes, discount_factor=1.0):
 
     return stats
 
-tf.reset_default_graph()
-
-global_step = tf.Variable(0, name="global_step", trainable=False)
 
 with tf.Session() as sess:
-    actor = Actor(sess, number_features, number_actions)
-    critic = Critic(sess, number_features)
+    tf.reset_default_graph()
+    actor = Actor(sess, number_features, number_actions, learning_rate)
+    critic = Critic(sess, number_features, learning_rate)
     init = tf.global_variables_initializer()
     sess.run(init)
     # Note, due to randomness in the policy the number of episodes you need to learn a good
