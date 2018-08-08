@@ -12,9 +12,13 @@ from gym import wrappers
 env = gym.make('CartPole-v0')
 # force=True to overwrite the previous videos
 env = wrappers.Monitor(env, 'gym-videos', force=True)
-# https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-0-q-learning-with-tables-and-neural-networks-d195264329d0
+
 # Policy gradient has high variance, seed for reproducability
+# https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-0-q-learning-with-tables-and-neural-networks-d195264329d0
+# https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/blob/master/contents/8_Actor_Critic_Advantage/AC_CartPole.py
 env.seed(1)
+np.random.seed(1)
+tf.set_random_seed(1)  # reproducible
 gamma = 0.99
 
 def discount_rewards(r):
@@ -98,7 +102,7 @@ with tf.Session() as sess:
             a = np.argmax(a_dist == a)
 
             s1, r, d, _ = env.step(a)  # Get our reward for taking an action given a bandit.
-            env.render()
+            #env.render()
             # print('done={}'.format(d))
             idx_s, idx_a, idx_r = 0, 1, 2
             ep_history.append([s, a, r, s1])

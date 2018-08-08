@@ -16,7 +16,8 @@ for i, x in enumerate(mylist, 1):
 step = 100
 moving_aves = moving_aves[0::step]
 plt.xticks(range(0, len(moving_aves)), range(1, len(moving_aves * step), step))
-plt.title('CartPole simulation with REINFORCE algorithm')
+plt.xticks(rotation=90)
+plt.title('CartPole simulation with Advantage Actor Critic (A2C) algorithm')
 plt.xlabel('Episode')
 plt.ylabel('Average reward')
 plt.plot(moving_aves)
