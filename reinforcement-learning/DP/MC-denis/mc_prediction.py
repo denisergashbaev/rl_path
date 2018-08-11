@@ -45,25 +45,25 @@ def mc_prediction(policy, env, num_episodes, discount_factor=1.0):
             print("\rEpisode {}/{}.".format(ep, num_episodes), end="")
 
         state = env.reset()
+        # uncomment for some resemblance of reproducibility
+        # state = (17, 10, False)
         done = False
-        states = []
+        s_a_r = []
         while not done:
             action = policy(state)
-            s = env.step(action)
-            next_state, reward, done, _ = s
-            states.append((state, action, reward))
+            next_state, reward, done, _ = env.step(action)
+            s_a_r.append((state, action, reward))
             state = next_state
 
-        for state_idx, s_a_r in enumerate(states):
             g = 0
-            for s in states[state_idx:]:
-                _, action, reward = s
-                g += discount_factor * reward
-            state, _, _ = s_a_r
-            returns_sum[state] += g
-            returns_count[state] += 1
-            V[state] = returns_sum[state] / returns_count[state]
-
+            states = [x[0] for x in s_a_r]
+            for idx, item in enumerate(reversed(s_a_r)):
+                s, _, r = item
+                g += discount_factor * r
+                if s not in states[:len(s_a_r) - 1 - idx]:
+                    returns_sum[s] += g
+                    returns_count[s] += 1
+                    V[s] = returns_sum[s] / returns_count[s]
     return V
 
 

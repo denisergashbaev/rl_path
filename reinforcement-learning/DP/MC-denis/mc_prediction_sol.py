@@ -50,6 +50,8 @@ def mc_prediction(policy, env, num_episodes, discount_factor=1.0):
         # An episode is an array of (state, action, reward) tuples
         episode = []
         state = env.reset()
+        state = (17, 10, False)
+
         done = False
         while not done:
             action = policy(state)
@@ -83,5 +85,5 @@ def sample_policy(observation):
 V_10k = mc_prediction(sample_policy, env, num_episodes=10000)
 plotting.plot_value_function(V_10k, title="10,000 Steps")
 
-V_500k = mc_prediction(sample_policy, env, num_episodes=500000)
-plotting.plot_value_function(V_500k, title="500,000 Steps")
+#V_500k = mc_prediction(sample_policy, env, num_episodes=500000)
+#plotting.plot_value_function(V_500k, title="500,000 Steps")
