@@ -64,12 +64,12 @@ def mc_control_epsilon_greedy(env, num_episodes, discount_factor=1.0, epsilon=0.
     # The final action-value function.
     # A nested dictionary that maps state -> (action -> action-value).
     Q = defaultdict(lambda: np.zeros(env.action_space.n))
+    # The policy we're following
+    policy = make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
 
     for ep_idx in range(num_episodes):
         if ep_idx % 1000 == 0:
             print('running episode {}/{}'.format(ep_idx, num_episodes), end='\n')
-        # The policy we're following
-        policy = make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
         done = False
         s_a_r = []
         s_a = []
@@ -86,6 +86,7 @@ def mc_control_epsilon_greedy(env, num_episodes, discount_factor=1.0, epsilon=0.
             g += discount_factor * r
             item = (s, a)
             if item not in s_a[:len(s_a) - 1 - idx]:
+                # over _all_ sampled episodes
                 returns_sum[item] += g
                 returns_count[item] += 1
                 Q[s][a] = returns_sum[item] / returns_count[item]
