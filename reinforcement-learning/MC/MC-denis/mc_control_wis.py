@@ -112,7 +112,7 @@ def mc_control_importance_sampling(env, num_episodes, behavior_policy, discount_
 
 
 random_policy = create_random_policy(env.action_space.n)
-Q, policy = mc_control_importance_sampling(env, num_episodes=5000000, behavior_policy=random_policy)
+Q, policy = mc_control_importance_sampling(env, num_episodes=500000, behavior_policy=random_policy)
 
 # For plotting: Create value function from action-value function
 # by picking the best action at each state
