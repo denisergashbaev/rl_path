@@ -1,4 +1,3 @@
-import gym
 import matplotlib
 import numpy as np
 import sys
@@ -83,7 +82,7 @@ def mc_control_epsilon_greedy(env, num_episodes, discount_factor=1.0, epsilon=0.
         g = 0
         for idx, rev_s_a_r in enumerate(reversed(s_a_r)):
             s, a, r = rev_s_a_r
-            g += discount_factor * r
+            g = discount_factor * g + r
             item = (s, a)
             if item not in s_a[:len(s_a) - 1 - idx]:
                 # over _all_ sampled episodes

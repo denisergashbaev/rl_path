@@ -1,6 +1,4 @@
-import gym
 import matplotlib
-import numpy as np
 import sys
 
 from collections import defaultdict
@@ -59,7 +57,7 @@ def mc_prediction(policy, env, num_episodes, discount_factor=1.0):
             states = [x[0] for x in s_a_r]
             for idx, item in enumerate(reversed(s_a_r)):
                 s, _, r = item
-                g += discount_factor * r
+                g = discount_factor * g + r
                 if s not in states[:len(s_a_r) - 1 - idx]:
                     returns_sum[s] += g
                     returns_count[s] += 1
